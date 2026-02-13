@@ -1,36 +1,248 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🏛️ Decentralized Autonomous Organization (DAO) Governance
 
-## Getting Started
+A full-stack DAO governance platform that enables users to create proposals and vote using a custom governance token.
 
-First, run the development server:
+This system leverages OpenZeppelin's **Governor** and **ERC20Votes** standards to implement a secure, on-chain voting mechanism.
+
+---
+
+## 🛠️ Tech Stack
+
+### Smart Contracts
+
+* Solidity
+* Hardhat
+* OpenZeppelin (Governor + ERC20Votes)
+
+### Frontend
+
+* Next.js
+* Wagmi
+* ConnectKit
+* Tailwind CSS
+
+### Infrastructure
+
+* Docker
+* Docker Compose
+
+### Network Options
+
+* Localhost (Hardhat Node)
+* Sepolia Testnet
+
+---
+
+# 🚀 Step-by-Step Setup Guide
+
+Follow this guide carefully to get the DAO system running.
+
+---
+
+## 1️⃣ Repository Setup & Environment Configuration
+
+### Clone the Repository
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/sai1432-ss/DOG-Voting
+cd DOG-Voting
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Install Dependencies
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Run in the project root directory:
 
-## Learn More
+```bash
+npm install
+```
 
-To learn more about Next.js, take a look at the following resources:
+This installs Hardhat and all required dependencies.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Setup Environment Variables
 
-## Deploy on Vercel
+Create your environment file:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+cp .env.example .env
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Open `.env` and configure the following:
+
+```
+PRIVATE_KEY=your_metamask_private_key
+SEPOLIA_RPC_URL=your_infura_or_alchemy_url
+```
+
+⚠️ Never commit your `.env` file.
+
+---
+
+## 2️⃣ Containerization (Docker)
+
+Docker ensures the blockchain node and frontend stay synchronized.
+
+### Start the System
+
+```bash
+docker-compose up --build
+```
+
+What happens:
+
+* Hardhat node container starts
+* Frontend container waits for blockchain health check
+* Both services connect automatically
+
+---
+
+## 3️⃣ Smart Contract Deployment
+
+With Docker containers running, deploy contracts to the local blockchain.
+
+Open a new terminal and run:
+
+```bash
+npx hardhat run scripts/deploy.js --network localhost
+```
+
+After deployment, you will see contract addresses printed in the terminal:
+
+* GovernanceToken address
+* MyGovernor address
+
+---
+
+### Link Contracts to Frontend
+
+Copy the deployed addresses and paste them into:
+
+```
+frontend/src/constants/index.js
+```
+
+Update:
+
+```javascript
+export const GOVERNANCE_TOKEN_ADDRESS = "PASTE_TOKEN_ADDRESS";
+export const GOVERNOR_ADDRESS = "PASTE_GOVERNOR_ADDRESS";
+```
+
+---
+
+## 4️⃣ MetaMask Configuration
+
+Your MetaMask must connect to your local Hardhat network.
+
+### Add Network
+
+* Network Name: Localhost 8545
+* RPC URL: [http://127.0.0.1:8545](http://127.0.0.1:8545)
+* Chain ID: 31337
+* Currency Symbol: ETH
+
+---
+
+### Reset Network (Important)
+
+If you've used this network before:
+
+MetaMask → Settings → Advanced → Clear activity tab data
+
+This prevents nonce conflicts.
+
+---
+
+## 5️⃣ Activating Your Voting Power
+
+Owning tokens alone does NOT grant voting power.
+You must delegate tokens to yourself.
+
+---
+
+### Open Hardhat Console
+
+```bash
+npx hardhat console --network localhost
+```
+
+---
+
+### Activation Script
+
+Run the following inside the console:
+
+```javascript
+const token = await ethers.getContractAt(
+  'GovernanceToken',
+  'PASTE_YOUR_TOKEN_ADDRESS'
+);
+
+// Transfer tokens to your MetaMask wallet
+await token.transfer(
+  'YOUR_METAMASK_ADDRESS',
+  ethers.parseEther('1000')
+);
+
+// Delegate voting power to yourself
+await token.delegate('YOUR_METAMASK_ADDRESS');
+```
+
+Now your wallet has active voting power.
+
+---
+
+# 📝 Usage Guide
+
+## Dashboard
+
+* View your token balance
+* View your voting power
+
+---
+
+## Create Proposal
+
+* Enter proposal description
+* Submit transaction
+* Wait for mining confirmation
+
+---
+
+## Vote on Proposal
+
+* Select proposal
+* Cast vote (For / Against / Abstain)
+* Confirm via MetaMask
+
+---
+
+# 📂 Project Structure
+
+```
+.
+├── contracts/
+├── scripts/
+├── frontend/
+├── docker-compose.yml
+├── hardhat.config.js
+├── .env.example
+└── README.md
+```
+
+
+
+
+# ⭐ What This Project Demonstrates
+
+* On-chain governance using OpenZeppelin Governor
+* ERC20Votes delegation mechanism
+* Full-stack Web3 integration
+* Dockerized blockchain + frontend sync
+* Hardhat local development workflow
+
+---
+
